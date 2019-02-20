@@ -1,0 +1,73 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Sep 6, 2016, 2:12:12 PM
+    Author     : ruzsaz
+*/
+
+* {
+    overflow: hidden;
+    resize: none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+}
+
+#main {
+    background: black;
+    height: 100%;
+    position: absolute;
+    width: 90%;
+    top: 0;
+    left: 0;
+    padding-top: 10vh;
+    padding-left: 5vw;
+    padding-right: 5vw;
+}
+
+div {
+    left: 0px;
+    top: 0px;
+}
+
+textarea {
+    position: relative;
+    width: 94%;
+    left: 3%;
+    font-size: 4vmin;
+    border-radius: 0.3em;
+    padding: 0.3em;
+}
+
+button {
+    position: absolute;
+    width: 20vw;    
+    font-size: 12vmin;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    padding: 0.2em;
+    border-radius: 0.1em;
+}
+
+button:hover {
+    background-color: lightgrey;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+button:focus {outline:0;}
+
+#startButton {
+    left: 20vw;
+}
+
+#stopButton {
+    right: 20vw;
+}

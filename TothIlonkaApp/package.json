@@ -1,0 +1,17 @@
+{
+  "name": "Vlc",
+  "version": "1.0.0",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "ruzsaz",
+  "contributors": [],
+  "dependencies": {
+    "express": "4.14.0",
+    "omxplayer-controll": "^0.1.9"
+  }
+}
