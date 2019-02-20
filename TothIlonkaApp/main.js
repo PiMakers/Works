@@ -10,8 +10,7 @@ var omxp = require('omxplayer-controll');
 var exec = require('child_process').exec;
 
 var media = ['./videos/loopvideo.mp4', './videos/oncevideo.mp4'];
-var mediaLength = [44144, 34344]
-
+var mediaLength = [-1, -1];
 
 var mediaString = ['szünet', 'műsor'];
 
@@ -19,10 +18,11 @@ var mode = 0;
 
 var status = -1;
 var currently = -1;
+var stopping = 0;
 var startTime;
 
 var opts = {
-    'audioOutput': 'hdmi', //  'hdmi' | 'local' | 'both'.
+    'audioOutput': 'local', //  'hdmi' | 'local' | 'both'.
     'blackBackground': true, //false | true | default: true.
     'disableKeys': true, //false | true | default: false.
     'disableOnScreenDisplay': true, //false | true | default: false.
@@ -30,17 +30,22 @@ var opts = {
     'subtitlePath': '', //default: "".
     'startAt': 0, //default: 0.
     'startVolume': 1.0, //0.0 ... 1.0 default: 1.0 ,
-    'alpha': 0
+    'alpha': 255
 
 };
 
 var poller = setInterval(function() {
     if (currently !== -1) {
         omxp.getPosition(function(err,pos) {
-	    console.log(err, pos)
+	    // console.log(err, pos)
             status = pos;
         });
-        console.log(status, mediaLength[currently]);
+        // console.log(status, mediaLength[currently]);
+    if (mediaLength[currently] === -1)
+        omxp.getDuration(function(err,dur) {
+            // console.log(err, pos)
+            mediaLength[currently] = dur;
+        });        
     }
 }, 500);
 
@@ -54,15 +59,10 @@ var startNewVideo = function() {
         fade(1, 1000, 50);
     }, 50);
 
-//    timeout1 = setTimeout(function() {
-//        fade(0, 1000, 50);
-//    }, 6000 - 1000);
-
     startTime = new Date().getTime();
-
 };
 
-var fade = function(to, totalTime, steps) {
+var fade = function(to, totalTime, steps, callback) {
     var time = parseInt(totalTime / steps);
     var internalCallback = function(t) {
         return function() {
@@ -70,10 +70,17 @@ var fade = function(to, totalTime, steps) {
                 t--;
                 setTimeout(internalCallback, time);
                 var al = (to === 0) ? (parseInt(t * 255 / steps)) : (255 - parseInt(t * 255 / steps));
+		if (to === 0) {
+		    omxp.setVolume(al*al/(256*256));
+		}
                 omxp.setAlpha(al, function(err) {
 		    //console.log(err);
 		});
-            }
+            } else {
+		if (callback !== undefined) {
+		    callback();
+		}
+	    }
         };
     }(steps);
     setTimeout(internalCallback, time);
@@ -88,30 +95,32 @@ app.get('/control', function(request, response) {
     var command = request.query.command;
     if (command === 'start') {
         if (currently === 0) {
-	    fade(0, 1000, 50);
-	    timeout1 = setTimeout(function() {
-		mode = 1;
+	    fade(0, 2000, 50, function() {
 		exec('killall omxplayer.bin');
-	    }, 1100);
-	    
-            
+		mode = 1;
+		stopping = 0;
+            });
+	mode = 1;
+	stopping = 1;
         }
     } else if (command === 'stop') {
         if (currently === 1) {
-	    fade(0, 1000, 50);
-	    timeout1 = setTimeout(function() {
-		mode = 0;
+	    fade(0, 2000, 50, function() {
 		exec('killall omxplayer.bin');
-	    }, 1100);
+		mode = 0;
+		stopping = 0;
+	    });
         }
         mode = 0;
+	stopping = 1;
     }
     var responseJson = {};
-    var percent = Math.round(100 * (((new Date().getTime()) - startTime) / mediaLength[currently]));
-    responseJson.statusMessage = 'Pillanatnyilag fut: ' + mediaString[currently] + ' (' + (percent) + '%)\n' +
+    var percent = Math.max(0, Math.round((mediaLength[currently] -  ((new Date().getTime()) - startTime)) / 1000));
+    var currentString = (stopping === 1) ? mediaString[currently] + ' (stop)' : mediaString[currently] + ' (' + (Math.floor(percent/60)) +':' + ('00' + (percent%60)).slice(-2) + ')';
+    responseJson.statusMessage = 'Pillanatnyilag fut: ' + currentString + '\n' +
             'Következő: ' + mediaString[mode];
     responseJson.mode = mode;
-    responseJson.currently = currently;
+    responseJson.currently = Math.abs(currently - stopping);
     response.writeHead(200, {"Content-Type": "application/json"});
     response.write(JSON.stringify(responseJson));
     response.end();
