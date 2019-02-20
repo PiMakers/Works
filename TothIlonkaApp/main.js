@@ -9,7 +9,8 @@ var app = express();
 var omxp = require('omxplayer-controll');
 var exec = require('child_process').exec;
 
-var media = ['./videos/loopvideo.mp4', './videos/oncevideo.mp4'];
+var media = ['./videos/T.I.FinalLoop.mp4', './videos/T.I.Final.mp4'];
+/// T.I.FinalLoop.mp4 = 45070; T.I.Final.mp4 = 1260202
 var mediaLength = [-1, -1];
 
 var mediaString = ['szünet', 'műsor'];
@@ -30,22 +31,29 @@ var opts = {
     'subtitlePath': '', //default: "".
     'startAt': 0, //default: 0.
     'startVolume': 1.0, //0.0 ... 1.0 default: 1.0 ,
-    'alpha': 255
-
+    'alpha': 255,
+    'loop': true
 };
 
 var poller = setInterval(function() {
     if (currently !== -1) {
+        omxp.getDuration(function(err,dur) {
+            if ( err ) {
+                console.log(err, mediaLength[currently], dur)
+            }
+            else if (mediaLength[currently] === -1 ) {            
+                mediaLength[currently] = dur/1000;
+                console.log("MediaLength: ", mediaLength[currently], "s")
+            }
+        }); 
         omxp.getPosition(function(err,pos) {
-	    // console.log(err, pos)
+            if ( err ) {
+                console.log(err, mediaLength[currently], pos)
+                
+                return;
+            }
             status = pos;
         });
-        // console.log(status, mediaLength[currently]);
-    if (mediaLength[currently] === -1)
-        omxp.getDuration(function(err,dur) {
-            // console.log(err, pos)
-            mediaLength[currently] = dur;
-        });        
     }
 }, 500);
 
@@ -137,7 +145,7 @@ app.listen(8080);
 // Put a friendly message on the terminal
 console.log("Server running at http://127.0.0.1:8080/");
 
-exec('sudo fbi -noverbose -vt 1 ./black.png')
+///exec('sudo fbi -noverbose -vt 1 ./black.png')
 
 startNewVideo();
     
