@@ -39,16 +39,16 @@ var poller = setInterval(function() {
     if (currently !== -1) {
         omxp.getDuration(function(err,dur) {
             if ( err ) {
-                console.log(err, mediaLength[currently], dur)
+                // console.log(err, mediaLength[currently], dur)
             }
             else if (mediaLength[currently] === -1 ) {            
                 mediaLength[currently] = dur/1000;
-                console.log("MediaLength: ", mediaLength[currently], "s")
+                // console.log("MediaLength: ", mediaLength[currently], "s")
             }
         }); 
         omxp.getPosition(function(err,pos) {
             if ( err ) {
-                console.log(err, mediaLength[currently], pos)
+                // console.log(err, mediaLength[currently], pos)
                 
                 return;
             }
@@ -143,7 +143,7 @@ app.get('*', function(req, res) {
 app.listen(8080);
 
 // Put a friendly message on the terminal
-console.log("Server running at http://127.0.0.1:8080/");
+// console.log("Server running at http://127.0.0.1:8080/");
 
 ///exec('sudo fbi -noverbose -vt 1 ./black.png')
 
